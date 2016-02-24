@@ -171,6 +171,16 @@ static int load_conf(const char *conf)
         return -1;
     }
 
+    lua_getglobal(L, "log_level");
+    if(lua_isnumber(L, -1))
+        settings.log_level = (int)lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    lua_getglobal(L, "log_name"); //stack index: -1
+    if(lua_isstring(L, -1))
+        str_lcpy(settings.log_name, lua_tostring(L, -1), sizeof(settings.log_name));
+    lua_pop(L, 1);
+
     lua_getglobal(L, "is_daemon"); //stack index: -12
     if(lua_isnumber(L, -1))
         settings.is_daemon = (int)lua_tonumber(L, -1);
@@ -263,16 +273,6 @@ static int load_conf(const char *conf)
     lua_getglobal(L, "mc_port");
     if(lua_isnumber(L, -1))
         settings.cache_port = (int)lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "log_level");
-    if(lua_isnumber(L, -1))
-        settings.log_level = (int)lua_tonumber(L, -1);
-    lua_pop(L, 1);
-
-    lua_getglobal(L, "log_name"); //stack index: -1
-    if(lua_isstring(L, -1))
-        str_lcpy(settings.log_name, lua_tostring(L, -1), sizeof(settings.log_name));
     lua_pop(L, 1);
 
     lua_getglobal(L, "root_path");
