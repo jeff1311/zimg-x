@@ -96,9 +96,7 @@ static void settings_init(void)
     str_lcpy(settings.version, STR(PROJECT_VERSION), sizeof(settings.version));
     snprintf(settings.server_name, 128, "zimg/%s", settings.version);
     lua_State *L = luaL_newstate();
-	//liangjixun add 20160224
-    settings.headers = conf_get_headers(lua_tostring(L, -1));
-    LOG_PRINT(LOG_DEBUG, "settings_init:settings.headers = %s", settings.headers);
+    settings.headers = NULL;
     settings.etag = 0;
     settings.up_access = NULL;
     settings.down_access = NULL;
