@@ -1,47 +1,44 @@
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
+# Object files
+*.o
+*.s
+*.lo
 
-# Folder config file
-Desktop.ini
+# Libraries
+*.lib
+*.a
+*.la
 
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
+# Executables
+*.exe
+*.out
+*.app
+*.c.swp
+*.DS_Store
 
-# Windows shortcuts
-*.lnk
+.gitignore
+tags
 
-# =========================
-# Operating System Files
-# =========================
+*.swp
+*.pc
 
-# OSX
-# =========================
+*.log
+*.dSYM
 
-.DS_Store
-.AppleDouble
-.LSOverride
+doc/html/
 
-# Thumbnails
-._*
+bin/img/
+bin/log/
+bin/zimg
 
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
+bin/conf/debug.lua
+build/
 
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+#luaJIT headers
+deps/LuaJIT-2.0.3/
+
