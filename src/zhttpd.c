@@ -675,7 +675,8 @@ int multipart_parse(evhtp_request_t *req, const char *content_type, const char *
 
     if(mp_arg->succno == 0)
     {
-        evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1>\n");
+    	//liangjixun update 20160224
+        //evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1>\n");
     }
 
     //evbuffer_add_printf(req->buffer_out, "</body>\n</html>\n");
