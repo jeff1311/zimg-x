@@ -520,7 +520,6 @@ int on_chunk_data(multipart_parser* p, const char *at, size_t length)
 		//liangjixun add 20160224
 		if(length>100){
 			json_return(mp_arg->req, -1, md5sum, length);
-			evhtp_headers_add_header(mp_arg->req->headers_out, evhtp_header_new("Access-Control-Allow-Origin", "*", 0, 0));
 		}
     }
     return 0;
@@ -741,6 +740,7 @@ void post_request_cb(evhtp_request_t *req, void *arg)
     if(req_method >= 16)
         req_method = 16;
     LOG_PRINT(LOG_DEBUG, "Method: %d", req_method);
+    zimg_headers_add(req, settings.headers);
     if(strcmp(method_strmap[req_method], "POST") != 0)
     {
         LOG_PRINT(LOG_DEBUG, "Request Method Not Support.");
@@ -860,8 +860,6 @@ forbidden:
     goto done;
 
 err:
-	//liangjixun add 20160224
-	evhtp_headers_add_header(req->headers_out, evhtp_header_new("Access-Control-Allow-Origin", "*", 0, 0));
     if(ret_json == 0)
     {
         evbuffer_add_printf(req->buffer_out, "<h1>Upload Failed!</h1></body></html>"); 
