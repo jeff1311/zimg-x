@@ -226,11 +226,11 @@ static int load_conf(const char *conf)
     lua_pop(L, 1);
 
     lua_getglobal(L, "headers");
+    //liangjixun add 20160224
+    LOG_PRINT(LOG_DEBUG, "load_conf:settings.headers = %s", settings.headers);
     if(lua_isstring(L, -1))
     {
         settings.headers = conf_get_headers(lua_tostring(L, -1));
-		//liangjixun add 20160224
-        LOG_PRINT(LOG_DEBUG, "load_conf:settings.headers = %s", settings.headers);
     }
     lua_pop(L, 1);
 
