@@ -830,15 +830,15 @@ void post_request_cb(evhtp_request_t *req, void *arg)
             goto err;
         }
     }
-    if(strstr(content_type, "multipart/form-data") == NULL)
-    {
+    //if(strstr(content_type, "multipart/form-data") == NULL)
+    //{
         err_no = binary_parse(req, content_type, address, buff, post_size);
-    }
-    else
-    {
-        ret_json = 0;
-        err_no = multipart_parse(req, content_type, address, buff, post_size);
-    }
+    //}
+    //else
+    //{
+    //    ret_json = 0;
+    //    err_no = multipart_parse(req, content_type, address, buff, post_size);
+    //}
 	//liangjixun add 20160224
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() err_no = %d",err_no);
     if(err_no != -1)
