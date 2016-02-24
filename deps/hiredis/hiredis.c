@@ -1014,6 +1014,7 @@ void redisFree(redisContext *c) {
  * context will be set to the return value of the error function.
  * When no set of reply functions is given, the default set will be used. */
 redisContext *redisConnect(const char *ip, int port) {
+	LOG_PRINT(LOG_DEBUG, "==============redisConnect start==============");
     redisContext *c = redisContextInit();
     c->flags |= REDIS_BLOCK;
     redisContextConnectTcp(c,ip,port,NULL);

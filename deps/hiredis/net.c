@@ -205,6 +205,7 @@ int redisContextSetTimeout(redisContext *c, struct timeval tv) {
 }
 
 int redisContextConnectTcp(redisContext *c, const char *addr, int port, struct timeval *timeout) {
+	LOG_PRINT(LOG_DEBUG, "==============redisContextConnectTcp start==============");
     int s, rv;
     char _port[6];  /* strlen("65535"); */
     struct addrinfo hints, *servinfo, *p;

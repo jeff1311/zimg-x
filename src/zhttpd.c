@@ -196,8 +196,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
                 continue;
             }
 
-            //liangjixun add 20160224
-			LOG_PRINT(LOG_DEBUG, "conf_get_headers: value = %s", this_header);
             headers->value = this_header;
             headers->next = hdrconf->headers;
             hdrconf->headers = headers;
