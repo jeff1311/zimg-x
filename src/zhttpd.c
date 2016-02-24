@@ -427,12 +427,8 @@ int on_header_field(multipart_parser* p, const char *at, size_t length)
 
 int on_header_value(multipart_parser* p, const char *at, size_t length)
 {
-	//liangjixun add 20160224
-	LOG_PRINT(LOG_DEBUG, "on_header_value start");
     mp_arg_t *mp_arg = (mp_arg_t *)multipart_parser_get_data(p);
     char *filename = strnstr(at, "filename=", length);
-	//liangjixun add 20160224
-    LOG_PRINT(LOG_DEBUG, "on_header_value filename = %s",filename);
     char *nameend = NULL;
     if(filename)
     {
@@ -467,11 +463,13 @@ int on_header_value(multipart_parser* p, const char *at, size_t length)
         if(filename[0] != '\0' && mp_arg->check_name == -1)
         {
             LOG_PRINT(LOG_ERROR, "%s fail post type", mp_arg->address);
-            evbuffer_add_printf(mp_arg->req->buffer_out, 
+            /*evbuffer_add_printf(mp_arg->req->buffer_out,
                 "<h1>File: %s</h1>\n"
                 "<p>File type is not supported!</p>\n",
                 filename
-                );
+                );*/
+            //liangjixun update 20160224 File type not support
+            json_return(mp_arg->req,1,-1,-1);
         }
     }
     //multipart_parser_set_data(p, mp_arg);
@@ -830,15 +828,15 @@ void post_request_cb(evhtp_request_t *req, void *arg)
             goto err;
         }
     }
-    //if(strstr(content_type, "multipart/form-data") == NULL)
-    //{
+    if(strstr(content_type, "multipart/form-data") == NULL)
+    {
         err_no = binary_parse(req, content_type, address, buff, post_size);
-    //}
-    //else
-    //{
-    //    ret_json = 0;
-    //    err_no = multipart_parse(req, content_type, address, buff, post_size);
-    //}
+    }
+    else
+    {
+        //liangjixun update 20160224 code:ret_json = 0;
+        err_no = multipart_parse(req, content_type, address, buff, post_size);
+    }
 	//liangjixun add 20160224
     LOG_PRINT(LOG_DEBUG, "============post_request_cb() err_no = %d",err_no);
     if(err_no != -1)
