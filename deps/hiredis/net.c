@@ -50,6 +50,7 @@
 
 #include "net.h"
 #include "sds.h"
+#include "zlog.h"
 
 /* Defined in hiredis.c */
 void __redisSetError(redisContext *c, int type, const char *str);
