@@ -175,8 +175,6 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
         char *key = start;
         char *value = strchr(key, ':');
         size_t key_len = value - key;
-        //liangjixun add 20160224
-		LOG_PRINT(LOG_DEBUG, "conf_get_headers: value = %s", value);
         if (value)
         {
             zimg_header_t *this_header = (zimg_header_t *)malloc(sizeof(zimg_header_t));
@@ -198,6 +196,8 @@ zimg_headers_conf_t * conf_get_headers(const char *hdr_str)
                 continue;
             }
 
+            //liangjixun add 20160224
+			LOG_PRINT(LOG_DEBUG, "conf_get_headers: value = %s", this_header);
             headers->value = this_header;
             headers->next = hdrconf->headers;
             hdrconf->headers = headers;
