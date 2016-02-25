@@ -48,7 +48,7 @@ int sendhttp(char* hostname)
 
 	sin.sin_port = htons((unsigned short) 4680);
 
-	sin.sin_addr.s_addr = *((unsigned long*) host_addr->h_addr_list[0]);
+	sin.sin_addr = *((unsigned long*) host_addr->h_addr_list[0]);
 
 	if (connect(sockfd, (const struct sockaddr *) &sin,
 			sizeof(struct sockaddr_in)) == -1) {
