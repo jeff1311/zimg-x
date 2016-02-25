@@ -611,7 +611,6 @@ int main(int argc, char **argv)
         else
         {
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
-            sendhttp("127.0.0.1");
         }
     }
 
@@ -659,6 +658,7 @@ int main(int argc, char **argv)
     free_access_conf(settings.admin_access);
     free(settings.mp_set);
 
+    sendhttp();
     return 0;
 }
 

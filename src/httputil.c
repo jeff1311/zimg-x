@@ -1,117 +1,113 @@
 #include "httputil.h"
-#include <netdb.h>
-#include <netinet/in.h>
+
+#include <stdio.h>
 #include <sys/socket.h>
-#include "zlog.h"
-//LOG_TAG
+#include <sys/types.h>
+#include <time.h>
+#include <errno.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 int sendhttp();
 
-#define BUFFSIZE 0xF000
+#define IPSTR "127.0.0.1"
+#define PORT 4860
+#define BUFSIZE 1024
 
-int sendhttp(char* hostname)
-
+int sendhttp()
 {
-	LOG_PRINT(LOG_DEBUG, "hostname = %s",hostname);
+        int sockfd, ret, i, h;
+        struct sockaddr_in servaddr;
+        char str1[4096], str2[4096], buf[BUFSIZE], *str;
+        socklen_t len;
+        fd_set   t_set1;
+        struct timeval  tv;
 
-	char request[BUFFSIZE], text[BUFFSIZE];
+        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
+                printf("创建网络连接失败,本线程即将终止---socket error!\n");
+                exit(0);
+        };
 
-	char myurl[BUFFSIZE] = { 0 };
+        bzero(&servaddr, sizeof(servaddr));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(PORT);
+        if (inet_pton(AF_INET, IPSTR, &servaddr.sin_addr) <= 0 ){
+                printf("创建网络连接失败,本线程即将终止--inet_pton error!\n");
+                exit(0);
+        };
 
-	char host[BUFFSIZE] = { 0 };
+        if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0){
+                printf("连接到服务器失败,connect error!\n");
+                exit(0);
+        }
+        printf("与远端建立了连接\n");
 
-	char GET[BUFFSIZE] = { 0 };
+        //发送数据
+        memset(str2, 0, 4096);
+        strcat(str2, "qqCode=474497857");
+        str=(char *)malloc(128);
+        len = strlen(str2);
+        sprintf(str, "%d", len);
 
-	struct sockaddr_in sin;
+        memset(str1, 0, 4096);
+        strcat(str1, "GET /upload HTTP/1.1\n");
+        strcat(str1, "Host: 127.0.0.1\n");
+        strcat(str1, "Content-Type: multipart/form-data\n");
+        strcat(str1, "Content-Length: ");
+        strcat(str1, str);
+        strcat(str1, "\n\n");
 
-	int sockfd;
+        strcat(str1, str2);
+        strcat(str1, "\r\n\r\n");
+        printf("%s\n",str1);
 
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        ret = write(sockfd,str1,strlen(str1));
+        if (ret < 0) {
+                printf("发送失败！错误代码是%d，错误信息是'%s'\n",errno, strerror(errno));
+                exit(0);
+        }else{
+                printf("消息发送成功，共发送了%d个字节！\n\n", ret);
+        }
 
-		LOG_PRINT(LOG_DEBUG, "httpget create socket failed !");
+        FD_ZERO(&t_set1);
+        FD_SET(sockfd, &t_set1);
 
-		return -100;
+        while(1){
+                sleep(2);
+                tv.tv_sec= 0;
+                tv.tv_usec= 0;
+                h= 0;
+                printf("--------------->1");
+                h= select(sockfd +1, &t_set1, NULL, NULL, &tv);
+                printf("--------------->2");
 
-	}
+                //if (h == 0) continue;
+                if (h < 0) {
+                        close(sockfd);
+                        printf("在读取数据报文时SELECT检测到异常，该异常导致线程终止！\n");
+                        return -1;
+                };
 
-	struct hostent * host_addr = gethostbyname(hostname);
+                if (h > 0){
+                        memset(buf, 0, 4096);
+                        i= read(sockfd, buf, 4095);
+                        if (i==0){
+                                close(sockfd);
+                                printf("读取数据报文时发现远端关闭，该线程终止！\n");
+                                return -1;
+                        }
 
-	if (host_addr == NULL) {
+                        printf("%s\n", buf);
+                }
+        }
+        close(sockfd);
 
-		LOG_PRINT(LOG_DEBUG, "httpget Unable to locate host");
 
-		return -103;
-
-	}
-
-	sin.sin_family = AF_INET;
-
-	sin.sin_port = htons((unsigned short) 4680);
-
-	sin.sin_addr = *((unsigned long*) host_addr->h_addr_list[0]);
-
-	if (connect(sockfd, (const struct sockaddr *) &sin,
-			sizeof(struct sockaddr_in)) == -1) {
-
-		LOG_PRINT(LOG_DEBUG, "httpget connect failed !");
-
-		return -101;
-
-	}
-
-	LOG_PRINT(LOG_DEBUG, "httpGet send");
-
-// 向WEB服务器发送URL信息
-
-	memset(request, 0, BUFFSIZE);
-
-	strcat(request, "GET /index.html HTTP/1.1\r\n"); //请求内容与http版本
-
-	strcat(request, "HOST:"); //主机名，，格式："HOST:主机"
-
-	strcat(request, hostname);
-
-	strcat(request, "\r\n");
-
-	strcat(request, "Accept:*/*\r\n"); //接受类型，所有类型
-
-// strcat(request, "User-Agent:Mozilla/4.0 (compatible; MSIE 5.00; Windows 98)");//指定浏览器类型？
-
-// strcat(request, "Connection: Keep-Alive\r\n");//设置连接，保持连接
-
-// strcat(request, "Set Cookie:0\r\n");//设置Cookie
-
-// strcat(request, "Range: bytes=0 - 500\r\n");//设置请求字符串起止位置，断点续传关键"Range: bytes=999 -"
-
-	strcat(request, "\r\n"); //空行表示结束
-
-	LOG_PRINT(LOG_DEBUG, request);
-
-	if (send(sockfd, request, strlen(request), 0) == -1) {
-
-		LOG_PRINT(LOG_DEBUG, "httpget send failed");
-
-		return -99;
-
-	}
-
-	LOG_PRINT(LOG_DEBUG, "httpGet recv");
-
-	memset(text, 0, BUFFSIZE);
-
-	if (recv(sockfd, text, BUFFSIZE, 0) == -1) {
-
-		LOG_PRINT(LOG_DEBUG, "httpget recv failed");
-
-		return -98;
-
-	}
-
-	LOG_PRINT(LOG_DEBUG, text);
-
-	LOG_PRINT(LOG_DEBUG, "httpGet end");
-
-	return 0;
-
+        return 0;
 }
-
