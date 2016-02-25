@@ -16,16 +16,18 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include "zlog.h"
 
 #define BUFSIZE 1024
-#define DestIp "xx.xx.xx.xx"
-#define DestPort 9000
-#define Req "GET /index.html HTTP/1.1\r\nHost: xx.xx.xx.xx\r\nConnection: Close\r\n\r\n"
+#define DestIp "127.0.0.1"
+#define DestPort 4860
+#define Req "GET /xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: Close\r\n\r\n"
 #define ReqLen sizeof(Req)
 
-void sendhttp(char *url);
+void sendhttp();
 
-void sendhttp(char *url){
+void sendhttp(){
+	LOG_PRINT(LOG_DEBUG, "==========sendhttp start==========");
     ssize_t i;
     int nRequestLen;
 
@@ -62,6 +64,7 @@ void sendhttp(char *url){
     /* Read in the response */
     while(1) {
                     i = read(sockfd,strResponse,BUFSIZE-1);
+                    LOG_PRINT(LOG_DEBUG, "==========sendhttp response = %s==========",i);
                     if(0 >= i){
                                     break;
                     }

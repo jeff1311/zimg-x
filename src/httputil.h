@@ -8,6 +8,6 @@
 #ifndef HTTPUTIL_H_
 #define HTTPUTIL_H_
 
-void sendhttp(char *url);
+void sendhttp();
 
 #endif
