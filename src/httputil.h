@@ -8,6 +8,6 @@
 #ifndef HTTPUTIL_H_
 #define HTTPUTIL_H_
 
-int sendhttp();
+int sendhttp(char* hostname);
 
 #endif

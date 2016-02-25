@@ -611,7 +611,7 @@ int main(int argc, char **argv)
         else
         {
             LOG_PRINT(LOG_DEBUG, "Connect to ssdb server Success");
-            sendhttp();
+            sendhttp("127.0.0.1");
         }
     }
 
