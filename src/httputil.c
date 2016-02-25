@@ -28,7 +28,7 @@ int httpGet(char* hostname)
 
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 
-		LOGE("httpget create socket failed !");
+		LOG_PRINT(LOG_DEBUG, "httpget create socket failed !");
 
 		return -100;
 
