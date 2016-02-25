@@ -7,74 +7,167 @@
 
 #include "httputil.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include "zlog.h"
 
-#define BUFSIZE 1024
-#define DestIp "127.0.0.1"
-#define DestPort 4860
-#define Req "GET /xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: Close\r\n\r\n"
-#define ReqLen sizeof(Req)
+/*************************************************************************
+ *
+ * Copyright (c) 2012-2013 by xuwm All Rights Reserved
+ *
+ * FILENAME:  WebClnt.c
+ *
+ * PURPOSE :  HTTP 客户端程序, 获取网页.
+ *
+ * AUTHOR  :  许文敏
+ *
+ **************************************************************************/
+#include "stdafx.h"
+#include <stdio.h>
+#include <winsock2.h>
+
+#pragma comment(lib, "ws2_32.lib")  /* WinSock使用的库函数 */
+
+/* 定义常量 */
+#define HTTP_DEF_PORT     80  /* 连接的缺省端口 */
+#define HTTP_BUF_SIZE   1024  /* 缓冲区的大小   */
+#define HTTP_HOST_LEN    256  /* 主机名长度 */
+
+char *http_req_hdr_tmpl = "GET %s HTTP/1.1\r\n"
+    "Accept: image/gif, image/jpeg, */*\r\nAccept-Language: zh-cn\r\n"
+    "Accept-Encoding: gzip, deflate\r\nHost: %s:%d\r\n"
+    "User-Agent: Huiyong's Browser <0.1>\r\nConnection: Keep-Alive\r\n\r\n";
 
 void sendhttp();
 
-void sendhttp(){
-	LOG_PRINT(LOG_DEBUG, "==========sendhttp start==========");
-    ssize_t i;
-    int nRequestLen;
+/**************************************************************************
+ *
+ * 函数功能: 解析命令行参数, 分别得到主机名, 端口号和文件名. 命令行格式:
+ *           [http://www.baidu.com:8080/index.html]
+ *
+ * 参数说明: [IN]  buf, 字符串指针数组;
+ *           [OUT] host, 保存主机;
+ *           [OUT] port, 端口;
+ *           [OUT] file_name, 文件名;
+ *
+ * 返 回 值: void.
+ *
+ **************************************************************************/
+void http_parse_request_url(const char *buf, char *host,
+                            unsigned short *port, char *file_name)
+{
+    int length = 0;
+    char port_buf[8];
+    char *buf_end = (char *)(buf + strlen(buf));
+    char *begin, *host_end, *colon, *file;
 
-    char strResponse[BUFSIZE]={0};
-    char strRequest[BUFSIZE]={0};
+    /* 查找主机的开始位置 */
 
+    begin = const_cast<char*>(strstr(buf, "//"));
+    begin = (begin ? begin + 2 : const_cast<char*>(buf));
 
-    int sockfd, numbytes;
-    struct sockaddr_in dest_addr; /* connector's address information */
+    colon = strchr(begin, ':');
+    host_end = strchr(begin, '/');
 
-    if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-                    perror("socket");
-                    exit(1);
+    if (host_end == NULL)
+    {
+        host_end = buf_end;
+    }
+    else
+    {   /* 得到文件名 */
+        file = strrchr(host_end, '/');
+        if (file && (file + 1) != buf_end)
+            strcpy(file_name, file + 1);
+    }
+    if (colon) /* 得到端口号 */
+    {
+        colon++;
+
+        length = host_end - colon;
+        memcpy(port_buf, colon, length);
+        port_buf[length] = 0;
+        *port = atoi(port_buf);
+
+        host_end = colon - 1;
     }
 
-    LOG_PRINT(LOG_DEBUG, "==========sendhttp 46==========");
-    dest_addr.sin_family = AF_INET; /* host byte order */
-    dest_addr.sin_port = htons(DestPort); /* short, network byte order */
-    dest_addr.sin_addr.s_addr = inet_addr(DestIp);
+    /* 得到主机信息 */
+    length = host_end - begin;
+    memcpy(host, begin, length);
+    host[length] = 0;
+}
 
-    /* Create and setup the connection */
-    if (connect(sockfd, (struct sockaddr *)&dest_addr,sizeof(struct sockaddr)) == -1) {
-                    perror("connect");
-                    exit(1);
+int sendhttp()
+{
+    WSADATA wsa_data;
+    SOCKET  http_sock = 0;         /* socket 句柄 */
+    struct sockaddr_in serv_addr;  /* 服务器地址 */
+    struct hostent *host_ent;
+
+    int result = 0, send_len;
+    char data_buf[HTTP_BUF_SIZE];
+    char host[HTTP_HOST_LEN] = "127.0.0.1";
+    unsigned short port = HTTP_DEF_PORT;
+    unsigned long addr;
+    char file_name[HTTP_HOST_LEN] = "4d2579ed340923db18dc7f89104c812c";
+    //char file_nameforsave[HTTP_HOST_LEN] = "index1.html";
+    //FILE *file_web;
+
+    http_parse_request_url(0, host, &port, file_name);
+    WSAStartup(MAKEWORD(2,0), &wsa_data); /* 初始化 WinSock 资源 */
+
+    addr = inet_addr(host);
+    if (addr == INADDR_NONE)
+    {
+        host_ent = gethostbyname(host);
+        if (!host_ent)
+        {
+            printf("[Web] invalid host\n");
+            return -1;
+        }
+
+        memcpy(&addr, host_ent->h_addr_list[0], host_ent->h_length);
     }
 
-    /* Send the request */
-    strncpy(strRequest, Req,ReqLen);
-    nRequestLen = ReqLen;
-    if (write(sockfd,strRequest,nRequestLen) == -1) {
-            perror("write");
-            exit(1);
+    /* 服务器地址 */
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = addr;
+
+    http_sock = socket(AF_INET, SOCK_STREAM, 0); /* 创建 socket */
+    result = connect(http_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    if (result == SOCKET_ERROR) /* 连接失败 */
+    {
+        closesocket(http_sock);
+        printf("[Web] fail to connect, error = %d\n", WSAGetLastError());
+        return -1;
     }
 
-    LOG_PRINT(LOG_DEBUG, "==========sendhttp 65==========");
-    /* Read in the response */
-    while(1) {
-                    i = read(sockfd,strResponse,BUFSIZE-1);
-                    LOG_PRINT(LOG_DEBUG, "==========sendhttp response = %s==========",i);
-                    if(0 >= i){
-                                    break;
-                    }
-                    strResponse[i]='\0';
-                    printf(strResponse);
-
+    /* 发送 HTTP 请求 */
+    send_len = sprintf(data_buf, http_req_hdr_tmpl, 0, host, port);
+    result = send(http_sock, data_buf, send_len, 0);
+    if (result == SOCKET_ERROR) /* 发送失败 */
+    {
+        printf("[Web] fail to send, error = %d\n", WSAGetLastError());
+        return -1;
     }
 
-    /* Close the connection */
-    close(sockfd);
+    //file_web = fopen(file_nameforsave, "a+");
+
+    do /* 接收响应并保存到文件中 */
+    {
+        result = recv(http_sock, data_buf, HTTP_BUF_SIZE, 0);
+        if (result > 0)
+        {
+            //fwrite(data_buf, 1, result, file_web);
+
+            /* 在屏幕上输出 */
+            data_buf[result] = 0;
+            printf("%s", data_buf);
+        }
+    } while(result > 0);
+
+    printf("httputil result = %s", result);
+    //fclose(file_web);
+    closesocket(http_sock);
+    WSACleanup();
+
+    return 0;
 }
