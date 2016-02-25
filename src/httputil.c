@@ -43,6 +43,7 @@ void sendhttp(){
                     exit(1);
     }
 
+    LOG_PRINT(LOG_DEBUG, "==========sendhttp 46==========");
     dest_addr.sin_family = AF_INET; /* host byte order */
     dest_addr.sin_port = htons(DestPort); /* short, network byte order */
     dest_addr.sin_addr.s_addr = inet_addr(DestIp);
