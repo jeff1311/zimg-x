@@ -1,32 +1,27 @@
-/*
- * httputil.c
- *
- *  Created on: 2016年2月25日
- *      Author: user
- */
-
-#include "httputil.h"
-
-
 /*************************************************************************
  *
- * Copyright (c) 2012-2013 by xuwm All Rights Reserved
+ * Copyright (c) 2002-2005 by Zhang Huiyong All Rights Reserved
  *
  * FILENAME:  WebClnt.c
  *
  * PURPOSE :  HTTP 客户端程序, 获取网页.
  *
- * AUTHOR  :  许文敏
+ * AUTHOR  :  张会勇
+ *
+ * BOOK    :  <<WinSock网络编程经络>>
  *
  **************************************************************************/
-#include "stdafx.h"
+
+#include "httputil.h"
+
+
 #include <stdio.h>
 #include <winsock2.h>
 
 #pragma comment(lib, "ws2_32.lib")  /* WinSock使用的库函数 */
 
 /* 定义常量 */
-#define HTTP_DEF_PORT     80  /* 连接的缺省端口 */
+#define HTTP_DEF_PORT     4860  /* 连接的缺省端口 */
 #define HTTP_BUF_SIZE   1024  /* 缓冲区的大小   */
 #define HTTP_HOST_LEN    256  /* 主机名长度 */
 
@@ -35,7 +30,7 @@ char *http_req_hdr_tmpl = "GET %s HTTP/1.1\r\n"
     "Accept-Encoding: gzip, deflate\r\nHost: %s:%d\r\n"
     "User-Agent: Huiyong's Browser <0.1>\r\nConnection: Keep-Alive\r\n\r\n";
 
-void sendhttp();
+int sendhttp();
 
 /**************************************************************************
  *
@@ -59,9 +54,8 @@ void http_parse_request_url(const char *buf, char *host,
     char *begin, *host_end, *colon, *file;
 
     /* 查找主机的开始位置 */
-
-    begin = const_cast<char*>(strstr(buf, "//"));
-    begin = (begin ? begin + 2 : const_cast<char*>(buf));
+    begin = strstr(buf, "//");
+    begin = (begin ? begin + 2 : buf);
 
     colon = strchr(begin, ':');
     host_end = strchr(begin, '/');
@@ -76,6 +70,7 @@ void http_parse_request_url(const char *buf, char *host,
         if (file && (file + 1) != buf_end)
             strcpy(file_name, file + 1);
     }
+
     if (colon) /* 得到端口号 */
     {
         colon++;
@@ -94,7 +89,8 @@ void http_parse_request_url(const char *buf, char *host,
     host[length] = 0;
 }
 
-int sendhttp()
+
+int sendhttp(int argc, char **argv)
 {
     WSADATA wsa_data;
     SOCKET  http_sock = 0;         /* socket 句柄 */
@@ -107,8 +103,6 @@ int sendhttp()
     unsigned short port = HTTP_DEF_PORT;
     unsigned long addr;
     char file_name[HTTP_HOST_LEN] = "4d2579ed340923db18dc7f89104c812c";
-    //char file_nameforsave[HTTP_HOST_LEN] = "index1.html";
-    //FILE *file_web;
 
     http_parse_request_url(0, host, &port, file_name);
     WSAStartup(MAKEWORD(2,0), &wsa_data); /* 初始化 WinSock 资源 */
@@ -149,23 +143,17 @@ int sendhttp()
         return -1;
     }
 
-    //file_web = fopen(file_nameforsave, "a+");
-
     do /* 接收响应并保存到文件中 */
     {
         result = recv(http_sock, data_buf, HTTP_BUF_SIZE, 0);
         if (result > 0)
         {
-            //fwrite(data_buf, 1, result, file_web);
-
             /* 在屏幕上输出 */
             data_buf[result] = 0;
             printf("%s", data_buf);
         }
     } while(result > 0);
 
-    printf("httputil result = %s", result);
-    //fclose(file_web);
     closesocket(http_sock);
     WSACleanup();
 
