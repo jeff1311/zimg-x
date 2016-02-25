@@ -58,7 +58,7 @@ int save_img(thr_arg_t *thr_arg, const char *buff, const int len, char *md5)
     int result = -1;
 
 	//liangjixun update 20160224
-    LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5... buff = %s",buff);
+    LOG_PRINT(LOG_DEBUG, "Begin to Caculate MD5");
     md5_state_t mdctx;
     md5_byte_t md_value[16];
     char md5sum[33];
