@@ -62,6 +62,7 @@ void sendhttp(){
             exit(1);
     }
 
+    LOG_PRINT(LOG_DEBUG, "==========sendhttp 65==========");
     /* Read in the response */
     while(1) {
                     i = read(sockfd,strResponse,BUFSIZE-1);
