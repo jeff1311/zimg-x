@@ -9,7 +9,7 @@ int sendhttp();
 
 #define BUFFSIZE 0xF000
 
-int httpGet(char* hostname)
+int sendhttp(char* hostname)
 
 {
 	LOG_PRINT(LOG_DEBUG, "hostname = %s",hostname);
