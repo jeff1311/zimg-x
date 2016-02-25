@@ -1,161 +1,113 @@
-/*************************************************************************
- *
- * Copyright (c) 2002-2005 by Zhang Huiyong All Rights Reserved
- *
- * FILENAME:  WebClnt.c
- *
- * PURPOSE :  HTTP 客户端程序, 获取网页.
- *
- * AUTHOR  :  张会勇
- *
- * BOOK    :  <<WinSock网络编程经络>>
- *
- **************************************************************************/
-
 #include "httputil.h"
 
-
 #include <stdio.h>
-#include <winsock2.h>
-
-#pragma comment(lib, "ws2_32.lib")  /* WinSock使用的库函数 */
-
-/* 定义常量 */
-#define HTTP_DEF_PORT     4860  /* 连接的缺省端口 */
-#define HTTP_BUF_SIZE   1024  /* 缓冲区的大小   */
-#define HTTP_HOST_LEN    256  /* 主机名长度 */
-
-char *http_req_hdr_tmpl = "GET %s HTTP/1.1\r\n"
-    "Accept: image/gif, image/jpeg, */*\r\nAccept-Language: zh-cn\r\n"
-    "Accept-Encoding: gzip, deflate\r\nHost: %s:%d\r\n"
-    "User-Agent: Huiyong's Browser <0.1>\r\nConnection: Keep-Alive\r\n\r\n";
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <time.h>
+#include <errno.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 int sendhttp();
 
-/**************************************************************************
- *
- * 函数功能: 解析命令行参数, 分别得到主机名, 端口号和文件名. 命令行格式:
- *           [http://www.baidu.com:8080/index.html]
- *
- * 参数说明: [IN]  buf, 字符串指针数组;
- *           [OUT] host, 保存主机;
- *           [OUT] port, 端口;
- *           [OUT] file_name, 文件名;
- *
- * 返 回 值: void.
- *
- **************************************************************************/
-void http_parse_request_url(const char *buf, char *host,
-                            unsigned short *port, char *file_name)
+#define IPSTR "127.0.0.1"
+#define PORT 4860
+#define BUFSIZE 1024
+
+int sendhttp()
 {
-    int length = 0;
-    char port_buf[8];
-    char *buf_end = (char *)(buf + strlen(buf));
-    char *begin, *host_end, *colon, *file;
+        int sockfd, ret, i, h;
+        struct sockaddr_in servaddr;
+        char str1[4096], str2[4096], buf[BUFSIZE], *str;
+        socklen_t len;
+        fd_set   t_set1;
+        struct timeval  tv;
 
-    /* 查找主机的开始位置 */
-    begin = strstr(buf, "//");
-    begin = (begin ? begin + 2 : buf);
+        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
+                printf("创建网络连接失败,本线程即将终止---socket error!\n");
+                exit(0);
+        };
 
-    colon = strchr(begin, ':');
-    host_end = strchr(begin, '/');
+        bzero(&servaddr, sizeof(servaddr));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(PORT);
+        if (inet_pton(AF_INET, IPSTR, &servaddr.sin_addr) <= 0 ){
+                printf("创建网络连接失败,本线程即将终止--inet_pton error!\n");
+                exit(0);
+        };
 
-    if (host_end == NULL)
-    {
-        host_end = buf_end;
-    }
-    else
-    {   /* 得到文件名 */
-        file = strrchr(host_end, '/');
-        if (file && (file + 1) != buf_end)
-            strcpy(file_name, file + 1);
-    }
+        if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0){
+                printf("连接到服务器失败,connect error!\n");
+                exit(0);
+        }
+        printf("与远端建立了连接\n");
 
-    if (colon) /* 得到端口号 */
-    {
-        colon++;
+        //发送数据
+        memset(str2, 0, 4096);
+        strcat(str2, "qqCode=474497857");
+        str=(char *)malloc(128);
+        len = strlen(str2);
+        sprintf(str, "%d", len);
 
-        length = host_end - colon;
-        memcpy(port_buf, colon, length);
-        port_buf[length] = 0;
-        *port = atoi(port_buf);
+        memset(str1, 0, 4096);
+        strcat(str1, "GET /upload HTTP/1.1\n");
+        strcat(str1, "Host: 127.0.0.1\n");
+        strcat(str1, "Content-Type: multipart/form-data\n");
+        strcat(str1, "Content-Length: ");
+        strcat(str1, str);
+        strcat(str1, "\n\n");
 
-        host_end = colon - 1;
-    }
+        strcat(str1, str2);
+        strcat(str1, "\r\n\r\n");
+        printf("%s\n",str1);
 
-    /* 得到主机信息 */
-    length = host_end - begin;
-    memcpy(host, begin, length);
-    host[length] = 0;
-}
-
-
-int sendhttp(int argc, char **argv)
-{
-    WSADATA wsa_data;
-    SOCKET  http_sock = 0;         /* socket 句柄 */
-    struct sockaddr_in serv_addr;  /* 服务器地址 */
-    struct hostent *host_ent;
-
-    int result = 0, send_len;
-    char data_buf[HTTP_BUF_SIZE];
-    char host[HTTP_HOST_LEN] = "127.0.0.1";
-    unsigned short port = HTTP_DEF_PORT;
-    unsigned long addr;
-    char file_name[HTTP_HOST_LEN] = "4d2579ed340923db18dc7f89104c812c";
-
-    http_parse_request_url(0, host, &port, file_name);
-    WSAStartup(MAKEWORD(2,0), &wsa_data); /* 初始化 WinSock 资源 */
-
-    addr = inet_addr(host);
-    if (addr == INADDR_NONE)
-    {
-        host_ent = gethostbyname(host);
-        if (!host_ent)
-        {
-            printf("[Web] invalid host\n");
-            return -1;
+        ret = write(sockfd,str1,strlen(str1));
+        if (ret < 0) {
+                printf("发送失败！错误代码是%d，错误信息是'%s'\n",errno, strerror(errno));
+                exit(0);
+        }else{
+                printf("消息发送成功，共发送了%d个字节！\n\n", ret);
         }
 
-        memcpy(&addr, host_ent->h_addr_list[0], host_ent->h_length);
-    }
+        FD_ZERO(&t_set1);
+        FD_SET(sockfd, &t_set1);
 
-    /* 服务器地址 */
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(port);
-    serv_addr.sin_addr.s_addr = addr;
+        while(1){
+                sleep(2);
+                tv.tv_sec= 0;
+                tv.tv_usec= 0;
+                h= 0;
+                printf("--------------->1");
+                h= select(sockfd +1, &t_set1, NULL, NULL, &tv);
+                printf("--------------->2");
 
-    http_sock = socket(AF_INET, SOCK_STREAM, 0); /* 创建 socket */
-    result = connect(http_sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-    if (result == SOCKET_ERROR) /* 连接失败 */
-    {
-        closesocket(http_sock);
-        printf("[Web] fail to connect, error = %d\n", WSAGetLastError());
-        return -1;
-    }
+                //if (h == 0) continue;
+                if (h < 0) {
+                        close(sockfd);
+                        printf("在读取数据报文时SELECT检测到异常，该异常导致线程终止！\n");
+                        return -1;
+                };
 
-    /* 发送 HTTP 请求 */
-    send_len = sprintf(data_buf, http_req_hdr_tmpl, 0, host, port);
-    result = send(http_sock, data_buf, send_len, 0);
-    if (result == SOCKET_ERROR) /* 发送失败 */
-    {
-        printf("[Web] fail to send, error = %d\n", WSAGetLastError());
-        return -1;
-    }
+                if (h > 0){
+                        memset(buf, 0, 4096);
+                        i= read(sockfd, buf, 4095);
+                        if (i==0){
+                                close(sockfd);
+                                printf("读取数据报文时发现远端关闭，该线程终止！\n");
+                                return -1;
+                        }
 
-    do /* 接收响应并保存到文件中 */
-    {
-        result = recv(http_sock, data_buf, HTTP_BUF_SIZE, 0);
-        if (result > 0)
-        {
-            /* 在屏幕上输出 */
-            data_buf[result] = 0;
-            printf("%s", data_buf);
+                        printf("%s\n", buf);
+                }
         }
-    } while(result > 0);
+        close(sockfd);
 
-    closesocket(http_sock);
-    WSACleanup();
 
-    return 0;
+        return 0;
 }
