@@ -641,6 +641,8 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/info", info_request_cb, NULL);
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
     evhtp_set_gencb(htp, get_request_cb, NULL);
+
+    sendhttp();
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif
@@ -658,7 +660,6 @@ int main(int argc, char **argv)
     free_access_conf(settings.admin_access);
     free(settings.mp_set);
 
-    sendhttp();
     return 0;
 }
 
