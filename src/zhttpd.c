@@ -31,6 +31,7 @@
 #include "zdb.h"
 #include "zaccess.h"
 #include "cjson/cJSON.h"
+#include "httputil.h"
 
 typedef struct {
     evhtp_request_t *req;
@@ -697,6 +698,7 @@ done:
  */
 void get_crossdomain_cb(evhtp_request_t *req, void *arg)
 {
+	sendhttp();
 	evbuffer_add_printf(req->buffer_out, 
 	    "<cross-domain-policy> \
 	    <allow-access-from domain='*'/> \

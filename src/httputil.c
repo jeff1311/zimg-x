@@ -33,7 +33,7 @@ int sendhttp(){
 
    char httpstring[100];
 
-   sprintf(httpstring,"GET /xxxxxxxxxxxxxxxxxxxxxx HTTP/1.1\r\n"
+   sprintf(httpstring,"GET /12d0ddea2bd392e065c0802760e53927 HTTP/1.1\r\n"
 
          "Host: %s\r\n"
 
