@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "zlog.h"
 
 int sendhttp();
 
@@ -36,7 +37,7 @@ int sendhttp(){
 
          "Host: %s\r\n"
 
-         "Connection: Close\r\n\r\n","192.168.77.34");
+         "Connection: Close\r\n\r\n",IPSTR);
 
    char ch;
 
@@ -50,7 +51,7 @@ int sendhttp(){
 
    len = sizeof(address);
 
-   printf("address = %u",address.sin_addr);
+   LOG_PRINT(LOG_DEBUG,"address = %u",address.sin_addr);
 
    result = connect(sockfd,(struct sockaddr *)&address,len);
 
@@ -61,6 +62,8 @@ int sendhttp(){
       return 1;
 
    }
+
+   LOG_PRINT(LOG_DEBUG,"==========sendhttp 66==========");
 
    write(sockfd,httpstring,strlen(httpstring));
 
