@@ -33,11 +33,11 @@ int sendhttp(){
 
    char httpstring[100];
 
-   sprintf(httpstring,"GET /upload HTTP/1.1\r\n"
+   sprintf(httpstring,"GET /xxxxxxxxxxxxxxxxxxxxxx HTTP/1.1\r\n"
 
          "Host: %s\r\n"
 
-         "Connection: Close\r\n\r\n",IPSTR);
+         "Connection: Close\r\n\r\n","127.0.0.1:4860");
 
    char ch;
 
