@@ -37,6 +37,7 @@ int sendhttp()
         bzero(&servaddr, sizeof(servaddr));
         servaddr.sin_family = AF_INET;
         servaddr.sin_port = htons(PORT);
+		printf("servaddr.sin_addr = %s",servaddr.sin_addr);
         if (inet_pton(AF_INET, IPSTR, &servaddr.sin_addr) <= 0 ){
                 printf("创建网络连接失败,本线程即将终止--inet_pton error!\n");
                 exit(0);
