@@ -36,7 +36,7 @@ int sendhttp(){
 
          "Host: %s\r\n"
 
-         "Connection: Close\r\n\r\n","127.0.0.1");
+         "Connection: Close\r\n\r\n","192.168.77.34");
 
    char ch;
 
@@ -46,7 +46,7 @@ int sendhttp(){
 
    address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-   address.sin_port = htons(4680);
+   address.sin_port = htons(4860);
 
    len = sizeof(address);
 
