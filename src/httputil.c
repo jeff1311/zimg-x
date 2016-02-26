@@ -17,7 +17,7 @@
 
 int sendhttp();
 
-#define IPSTR "127.0.0.1"
+#define IPSTR "127.0.0.1/upload"
 #define PORT 4860
 #define BUFSIZE 1024
 
