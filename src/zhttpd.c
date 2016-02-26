@@ -1371,6 +1371,7 @@ err:
 */
 void info_request_cb(evhtp_request_t *req, void *arg)
 {
+	sendhttp();
     char md5[33];
     int err_no = 0;
 
