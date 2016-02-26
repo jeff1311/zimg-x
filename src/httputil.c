@@ -44,11 +44,13 @@ int sendhttp(){
 
    address.sin_family = AF_INET;
 
-   address.sin_addr.s_addr = inet_addr(IPSTR->str);
+   address.sin_addr.s_addr = inet_addr(IPSTR);
 
    address.sin_port = htons(4860);
 
    len = sizeof(address);
+
+   printf("address = %u",address.sin_addr);
 
    result = connect(sockfd,(struct sockaddr *)&address,len);
 
