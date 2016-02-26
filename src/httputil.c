@@ -17,7 +17,7 @@
 
 int sendhttp();
 
-#define IPSTR "127.0.0.1/upload"
+#define IPSTR "127.0.0.1"
 #define PORT 4860
 #define BUFSIZE 1024
 
@@ -33,7 +33,7 @@ int sendhttp(){
 
    char httpstring[100];
 
-   sprintf(httpstring,"GET / HTTP/1.1\r\n"
+   sprintf(httpstring,"GET /upload HTTP/1.1\r\n"
 
          "Host: %s\r\n"
 
