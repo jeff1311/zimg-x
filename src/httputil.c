@@ -20,95 +20,58 @@ int sendhttp();
 #define PORT 4860
 #define BUFSIZE 1024
 
-int sendhttp()
-{
-        int sockfd, ret, i, h;
-        struct sockaddr_in servaddr;
-        char str1[4096], str2[4096], buf[BUFSIZE], *str;
-        socklen_t len;
-        fd_set   t_set1;
-        struct timeval  tv;
+int sendhttp(){
 
-        if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) {
-                printf("创建网络连接失败,本线程即将终止---socket error!\n");
-                exit(0);
-        };
+   int sockfd;
 
-        bzero(&servaddr, sizeof(servaddr));
-        servaddr.sin_family = AF_INET;
-        servaddr.sin_port = htons(PORT);
-        servaddr.sin_addr.s_addr = inet_addr(IPSTR);
-        if (inet_pton(AF_INET, IPSTR, &servaddr.sin_addr) <= 0 ){
-                printf("创建网络连接失败,本线程即将终止--inet_pton error!\n");
-                exit(0);
-        };
+   int len;
 
-        if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0){
-                printf("连接到服务器失败,connect error!\n");
-                exit(0);
-        }
-        printf("与远端建立了连接\n");
+   struct sockaddr_in address;
 
-        //发送数据
-        memset(str2, 0, 4096);
-        strcat(str2, "qqCode=474497857");
-        str=(char *)malloc(128);
-        len = strlen(str2);
-        sprintf(str, "%d", len);
+   int result;
 
-        memset(str1, 0, 4096);
-        strcat(str1, "GET /upload HTTP/1.1\n");
-        strcat(str1, "Host: 127.0.0.1\n");
-        strcat(str1, "Content-Type: multipart/form-data\n");
-        strcat(str1, "Content-Length: ");
-        strcat(str1, str);
-        strcat(str1, "\n\n");
+   char httpstring[100];
 
-        strcat(str1, str2);
-        strcat(str1, "\r\n\r\n");
-        printf("%s\n",str1);
+   sprintf(httpstring,"GET / HTTP/1.1\r\n"
 
-        ret = write(sockfd,str1,strlen(str1));
-        if (ret < 0) {
-                printf("发送失败！错误代码是%d，错误信息是'%s'\n",errno, strerror(errno));
-                exit(0);
-        }else{
-                printf("消息发送成功，共发送了%d个字节！\n\n", ret);
-        }
+         "Host: %s\r\n"
 
-        FD_ZERO(&t_set1);
-        FD_SET(sockfd, &t_set1);
+         "Connection: Close\r\n\r\n","127.0.0.1");
 
-        while(1){
-                sleep(2);
-                tv.tv_sec= 0;
-                tv.tv_usec= 0;
-                h= 0;
-                printf("--------------->1");
-                h= select(sockfd +1, &t_set1, NULL, NULL, &tv);
-                printf("--------------->2");
+   char ch;
 
-                //if (h == 0) continue;
-                if (h < 0) {
-                        close(sockfd);
-                        printf("在读取数据报文时SELECT检测到异常，该异常导致线程终止！\n");
-                        return -1;
-                };
+   sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-                if (h > 0){
-                        memset(buf, 0, 4096);
-                        i= read(sockfd, buf, 4095);
-                        if (i==0){
-                                close(sockfd);
-                                printf("读取数据报文时发现远端关闭，该线程终止！\n");
-                                return -1;
-                        }
+   address.sin_family = AF_INET;
 
-                        printf("%s\n", buf);
-                }
-        }
-        close(sockfd);
+   address.sin_addr.s_addr = inet_addr("127.0.0.1");
 
+   address.sin_port = htons(4680);
 
-        return 0;
+   len = sizeof(address);
+
+   result = connect(sockfd,(struct sockaddr *)&address,len);
+
+   if(result == -1){
+
+      perror("oops: client");
+
+      return 1;
+
+   }
+
+   write(sockfd,httpstring,strlen(httpstring));
+
+   while(read(sockfd,&ch,1)){
+
+     printf("%c", ch);
+
+   }
+
+   close(sockfd);
+
+   printf("\n");
+
+   return 0;
+
 }
