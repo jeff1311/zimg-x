@@ -50,6 +50,8 @@ int sendhttp(){
 
    len = sizeof(address);
 
+   printf("address = %s", address);
+
    result = connect(sockfd,(struct sockaddr *)&address,len);
 
    if(result == -1){
