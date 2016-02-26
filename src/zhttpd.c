@@ -31,6 +31,7 @@
 #include "zdb.h"
 #include "zaccess.h"
 #include "cjson/cJSON.h"
+#include "httputil.h"
 
 typedef struct {
     evhtp_request_t *req;
