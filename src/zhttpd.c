@@ -31,7 +31,6 @@
 #include "zdb.h"
 #include "zaccess.h"
 #include "cjson/cJSON.h"
-#include "httputil.h"
 
 typedef struct {
     evhtp_request_t *req;
@@ -1372,7 +1371,6 @@ err:
 */
 void info_request_cb(evhtp_request_t *req, void *arg)
 {
-	sendhttp();
     char md5[33];
     int err_no = 0;
 
