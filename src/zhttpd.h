@@ -56,5 +56,6 @@ void get_request_cb(evhtp_request_t *req, void *arg);
 void admin_request_cb(evhtp_request_t *req, void *arg);
 void info_request_cb(evhtp_request_t *req, void *arg);
 void get_crossdomain_cb(evhtp_request_t *req, void *arg);
+void get_iframe_cb(evhtp_request_t *req, void *arg);
 
 #endif

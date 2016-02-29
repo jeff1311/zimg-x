@@ -52,6 +52,7 @@ void dump_request_cb(evhtp_request_t *req, void *arg);
 void echo_request_cb(evhtp_request_t *req, void *arg);
 void post_request_cb(evhtp_request_t *req, void *arg);
 void get_crossdomain_cb(evhtp_request_t *req, void *arg);
+void get_iframe_cb(evhtp_request_t *req, void *arg);
 void get_request_cb(evhtp_request_t *req, void *arg);
 void admin_request_cb(evhtp_request_t *req, void *arg);
 void info_request_cb(evhtp_request_t *req, void *arg);
@@ -702,6 +703,32 @@ void get_crossdomain_cb(evhtp_request_t *req, void *arg)
 	    <allow-access-from domain='*'/> \
 	    </cross-domain-policy>");
 	LOG_PRINT(LOG_DEBUG, "get_crossdomain_cb"); 
+	evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/xml", 0, 0));
+        evhtp_send_reply(req, EVHTP_RES_OK);
+	return;
+}
+
+/**
+ * @brief get_iframe_cb The callback function of a POST request to upload a image.
+ *
+ * @param req The request with image buffer.
+ * @param arg It is not useful.
+ */
+void get_iframe_cb(evhtp_request_t *req, void *arg)
+{
+	evbuffer_add_printf(req->buffer_out,
+		"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'> \
+		<html xmlns='http://www.w3.org/1999/xhtml'> \
+		<head> \
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> \
+		<script type='text/javascript'> \
+			document.domain = 'xiaoyuer.net'; \
+		</script> \
+		</head> \
+		<body> \
+		</body> \
+		</html>");
+	LOG_PRINT(LOG_DEBUG, "get_iframe_cb");
 	evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/xml", 0, 0));
         evhtp_send_reply(req, EVHTP_RES_OK);
 	return;

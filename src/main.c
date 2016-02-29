@@ -510,15 +510,11 @@ int main(int argc, char **argv)
         return -1;
     }
 
-	//liangjixun add 20160224
-    LOG_PRINT(LOG_DEBUG,"==============load_conf before==============");
     if(load_conf(conf_file) == -1)
     {
         fprintf(stderr, "'%s' load failed!\n", conf_file);
         return -1;
     }
-	//liangjixun add 20160224
-    LOG_PRINT(LOG_DEBUG,"==============load_conf end==============");
 
     if(bind_check(settings.port) == -1)
     {
@@ -636,6 +632,7 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/dump", dump_request_cb, NULL);
     evhtp_set_cb(htp, "/upload", post_request_cb, NULL);
     evhtp_set_cb(htp, "/crossdomain.xml", get_crossdomain_cb, NULL);
+	evhtp_set_cb(htp, "/imgiframe.html", get_iframe_cb, NULL);
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
     evhtp_set_cb(htp, "/info", info_request_cb, NULL);
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
