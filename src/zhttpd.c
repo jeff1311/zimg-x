@@ -717,16 +717,13 @@ void get_crossdomain_cb(evhtp_request_t *req, void *arg)
 void get_iframe_cb(evhtp_request_t *req, void *arg)
 {
 	evbuffer_add_printf(req->buffer_out,
-		"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'> \
-		<html xmlns='http://www.w3.org/1999/xhtml'> \
+		"<html> \
 		<head> \
 		<meta http-equiv='Content-Type' content='text/html; charset=utf-8' /> \
 		<script type='text/javascript'> \
-			document.domain = 'xiaoyuer.net'; \
+		document.domain = 'xiaoyuer.net'; \
 		</script> \
 		</head> \
-		<body> \
-		</body> \
 		</html>");
 	LOG_PRINT(LOG_DEBUG, "get_iframe_cb");
 	evhtp_headers_add_header(req->headers_out, evhtp_header_new("Content-Type", "text/xml", 0, 0));
