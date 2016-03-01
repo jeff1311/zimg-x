@@ -1019,6 +1019,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
 		goto forbidden;
     }
 
+	LOG_PRINT(LOG_DEBUG, "get_request_cb uri = %s",uri);
     size_t md5_len = strlen(uri) + 1;
     md5 = (char *)malloc(md5_len);
     if(md5 == NULL)
