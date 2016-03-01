@@ -77,7 +77,7 @@ disable_zoom_up = 0
 script_name     = pwd .. '/script/process.lua'
 --format value: 'none' for original or other format names
 --默认保存新图的格式，字符串'none'表示以原有格式保存，或者是期望使用的格式名
-format          = 'none'
+format          = 'jpeg'
 --quality value: 1~100(default: 75)
 --默认保存新图的质量
 quality         = 75
