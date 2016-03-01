@@ -1020,6 +1020,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
     }
 
     size_t md5_len = strlen(uri) + 1;
+    LOG_PRINT(LOG_DEBUG, "get_request_cb md5_len = %d",md5_len);
     md5 = (char *)malloc(md5_len);
     if(md5 == NULL)
     {
