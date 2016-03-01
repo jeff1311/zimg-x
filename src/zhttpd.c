@@ -1029,13 +1029,9 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
     if(uri[0] == '/')
-    {
     	str_lcpy(md5, uri+1, md5_len);
-		LOG_PRINT(LOG_DEBUG, "get_request_cb uri+1 = %s",uri+1);
-    }
-    else{
+    else
     	str_lcpy(md5, uri, md5_len);
-    }
     LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
     if(is_md5(md5) == -1)
     {
