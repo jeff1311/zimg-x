@@ -1019,7 +1019,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
 		goto forbidden;
     }
 
-    size_t md5_len = strlen(uri) + 1;
+    size_t md5_len = strlen(uri) - 9;
     LOG_PRINT(LOG_DEBUG, "get_request_cb md5_len = %d",md5_len);
     md5 = (char *)malloc(md5_len);
     if(md5 == NULL)
@@ -1029,7 +1029,7 @@ void get_request_cb(evhtp_request_t *req, void *arg)
         goto err;
     }
     if(uri[0] == '/')
-        str_lcpy(md5, uri+1, md5_len);
+        str_lcpy(md5, uri+11, md5_len);
     else
         str_lcpy(md5, uri, md5_len);
 	LOG_PRINT(LOG_DEBUG, "md5 of request is <%s>",  md5);
