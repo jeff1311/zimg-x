@@ -36,7 +36,7 @@ admin_rule      = 'allow all'
 
 --cache config
 --是否启用memcached缓存
-cache           = 1
+cache           = 0
 --缓存服务器IP
 mc_ip           = '127.0.0.1'
 --缓存服务器端口
