@@ -93,7 +93,7 @@ mode            = 3
 --新文件是否存储，0为不存储，1为全都存储，2为只存储lua脚本产生的新图
 save_new        = 1
 --上传图片大小限制，默认100MB
-max_size        = 1024*1024
+max_size        = 5*1024*1024
 --允许上传图片类型列表
 allowed_type    = {'jpeg', 'jpg', 'png', 'gif', 'webp'}
 

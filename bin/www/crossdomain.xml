@@ -1,4 +1,0 @@
-<cross-domain-policy>
-<allow-access-from domain="192.168.186.128:4869"/>
-<allow-access-from domain="*.xiaoyuer.net"/>
-</cross-domain-policy>
