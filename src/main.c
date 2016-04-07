@@ -636,7 +636,7 @@ int main(int argc, char **argv)
     evhtp_set_cb(htp, "/admin", admin_request_cb, NULL);
     evhtp_set_cb(htp, "/info", info_request_cb, NULL);
     evhtp_set_cb(htp, "/echo", echo_cb, NULL);
-    evhtp_set_cb(htp,"/files/img/", get_request_cb, NULL);
+    evhtp_set_cb(htp, get_request_cb, NULL);
 #ifndef EVHTP_DISABLE_EVTHR
     evhtp_use_threads(htp, init_thread, settings.num_threads, NULL);
 #endif
